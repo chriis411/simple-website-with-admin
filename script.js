@@ -1,19 +1,37 @@
-// When the admin saves new content, update the text in index.html
-document.getElementById('save-btn')?.addEventListener('click', function() {
-    const newContent = document.getElementById('new-content').value;
-    
-    if (newContent) {
-        localStorage.setItem('content', newContent);
-        alert('Content updated successfully!');
-    } else {
-        alert('Please enter some content.');
+const API_URL = 'https://store.chriis411.workers.dev';
+
+// Fetch content from the API when the page loads
+window.addEventListener('DOMContentLoaded', async function () {
+    try {
+        const response = await fetch(`${API_URL}/get-content`);
+        const data = await response.json();
+        document.getElementById('content-text').textContent = data.content;
+    } catch (error) {
+        console.error('Error fetching content:', error);
     }
 });
 
-// On the main page, load the saved content if available
-window.addEventListener('DOMContentLoaded', function() {
-    const savedContent = localStorage.getItem('content');
-    if (savedContent) {
-        document.getElementById('content-text').textContent = savedContent;
+// Save content to the API from the admin panel
+document.getElementById('save-btn')?.addEventListener('click', async function () {
+    const newContent = document.getElementById('new-content').value;
+    if (newContent) {
+        try {
+            const response = await fetch(`${API_URL}/set-content`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: newContent }),
+            });
+
+            if (response.ok) {
+                alert('Content updated successfully!');
+            } else {
+                alert('Failed to update content.');
+            }
+        } catch (error) {
+            console.error('Error updating content:', error);
+            alert('An error occurred. Please try again.');
+        }
+    } else {
+        alert('Please enter some content.');
     }
 });
